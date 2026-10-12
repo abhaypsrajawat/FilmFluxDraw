@@ -1,74 +1,85 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { Excalidraw } from "@excalidraw/excalidraw";
-import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
-import { GlowLaser } from "./laser/GlowLaser";
-import { LaserControls, LASER_COLORS } from "./laser/LaserControls";
-import { useLaserShortcut } from "./laser/useLaserShortcut";
+import { useEffect, useState } from "react";
+import { BoardEditor } from "./canvas/BoardEditor";
+import type { Theme } from "./canvas/BoardEditor";
+import { Sidebar } from "./workspace/Sidebar";
+import { SidebarIcon } from "./workspace/icons";
+import { deleteScene } from "./workspace/sceneStorage";
+import { useWorkspace } from "./workspace/useWorkspace";
 
-const COLOR_KEY = "filmfluxdraw:laser-color";
+const THEME_KEY = "filmfluxdraw:theme";
+const NARROW_QUERY = "(max-width: 720px)";
 
-const loadColor = () => {
+const loadTheme = (): Theme => {
   try {
-    const saved = localStorage.getItem(COLOR_KEY);
-    if (saved && LASER_COLORS.some((c) => c.value === saved)) return saved;
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === "light" || saved === "dark") return saved;
   } catch {
-    // Storage can be unavailable (private mode); fall back to the default.
+    // Fall through to the system preference.
   }
-  return LASER_COLORS[0].value;
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 };
 
+const isNarrow = () => window.matchMedia?.(NARROW_QUERY).matches ?? false;
+
 export default function App() {
-  const [api, setApi] = useState<ExcalidrawImperativeAPI | null>(null);
-  const [laserActive, setLaserActive] = useState(false);
-  const [laserColor, setLaserColor] = useState(loadColor);
-  const [container, setContainer] = useState<HTMLElement | null>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [workspace, dispatch] = useWorkspace();
+  const [theme, setTheme] = useState(loadTheme);
+  // On phones the sidebar overlays the canvas, so start with it closed there.
+  const [sidebarOpen, setSidebarOpen] = useState(() => !isNarrow());
 
-  // The overlay is portaled into Excalidraw's own container so wheel
-  // events (zoom/pan) bubble to Excalidraw while the laser is on.
+  const board = workspace.nodes[workspace.activeBoardId];
+
   useEffect(() => {
-    if (api) setContainer(wrapperRef.current?.querySelector<HTMLElement>(".excalidraw") ?? null);
-  }, [api]);
+    if (board?.type === "board") document.title = `${board.name} · FilmFluxDraw`;
+  }, [board]);
 
-  const setLaser = useCallback(
-    (active: boolean) => {
-      // Drop out of any in-progress Excalidraw tool so nothing is half-drawn.
-      if (active) api?.setActiveTool({ type: "selection" });
-      setLaserActive(active);
-    },
-    [api],
-  );
-
-  useLaserShortcut(laserActive, setLaser);
-
-  const chooseColor = (color: string) => {
-    setLaserColor(color);
+  const changeTheme = (next: Theme) => {
+    setTheme(next);
     try {
-      localStorage.setItem(COLOR_KEY, color);
+      localStorage.setItem(THEME_KEY, next);
     } catch {
-      // Not persisting the color is fine.
+      // Not persisting the theme is fine.
     }
   };
 
+  if (board?.type !== "board") return null;
+
   return (
-    <div ref={wrapperRef} className="app">
-      <Excalidraw
-        excalidrawAPI={setApi}
-        onChange={(_elements, appState) => {
-          // Picking Excalidraw's built-in laser switches to the glowing one instead.
-          if (appState.activeTool.type === "laser") setLaser(true);
-        }}
-        renderTopRightUI={() => (
-          <LaserControls
-            active={laserActive}
-            color={laserColor}
-            onToggle={() => setLaser(!laserActive)}
-            onColorChange={chooseColor}
+    <div className="app" data-theme-mode={theme} data-sidebar={sidebarOpen ? "open" : "closed"}>
+      {sidebarOpen && (
+        <>
+          <Sidebar
+            workspace={workspace}
+            dispatch={dispatch}
+            onBoardsDeleted={(ids) => ids.forEach((id) => void deleteScene(id))}
+            onCollapse={() => setSidebarOpen(false)}
+            onBoardOpened={() => isNarrow() && setSidebarOpen(false)}
           />
+          <div className="app__scrim" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
+        </>
+      )}
+      <main className="app__board">
+        {!sidebarOpen && (
+          <button
+            type="button"
+            className="sidebar-reopen"
+            title="Show sidebar"
+            aria-label="Show sidebar"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <SidebarIcon />
+          </button>
         )}
-      />
-      {container && createPortal(<GlowLaser active={laserActive} color={laserColor} />, container)}
+        <BoardEditor
+          key={board.id}
+          board={board}
+          theme={theme}
+          onThemeChange={changeTheme}
+          onBackgroundChange={(background) =>
+            dispatch({ type: "setBackground", id: board.id, background })
+          }
+        />
+      </main>
     </div>
   );
 }

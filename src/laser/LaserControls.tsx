@@ -8,12 +8,14 @@ export const LASER_COLORS = [
 
 type Props = {
   active: boolean;
+  /** Icon-only button, for Excalidraw's cramped phone toolbar. */
+  compact?: boolean;
   color: string;
   onToggle: () => void;
   onColorChange: (color: string) => void;
 };
 
-export function LaserControls({ active, color, onToggle, onColorChange }: Props) {
+export function LaserControls({ active, compact, color, onToggle, onColorChange }: Props) {
   return (
     <div className="laser-controls" style={{ "--laser-color": color } as React.CSSProperties}>
       {active && (
@@ -38,10 +40,11 @@ export function LaserControls({ active, color, onToggle, onColorChange }: Props)
         className="laser-toggle"
         aria-pressed={active}
         title={active ? "Exit laser pointer (K or Esc)" : "Glowing laser pointer (K)"}
+        aria-label="Laser pointer"
         onClick={onToggle}
       >
         <span className="laser-toggle__dot" />
-        Laser
+        {!compact && "Laser"}
       </button>
     </div>
   );

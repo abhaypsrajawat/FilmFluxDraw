@@ -10,6 +10,21 @@ npm run dev      # http://localhost:5173
 npm run build    # typecheck + production build into dist/
 ```
 
+## Workspace: boards and folders
+
+The sidebar on the left holds your boards, organised in folders like Whimsical's.
+
+- **+** at the top creates a board or folder. Hover a folder for its own **+** to add inside it.
+- Double-click (or F2) to rename a board, folder, or the workspace. **⋯** has rename, move out of folder, and delete.
+- Drag items to reorder them or drop them onto a folder. Drop on empty space in the list to move back to the top level.
+- Hide the sidebar with the panel icon; on phones it slides over the board.
+
+Each board is saved automatically in the browser (IndexedDB), along with its scroll position and zoom. Nothing is sent to a server, so boards stay on the device and browser where you made them.
+
+## Canvas styles
+
+Main menu (☰) → **Canvas**: very light **Dots**, a light **Grid**, or **Blank**. The choice is saved per board, and the pattern follows scroll and zoom.
+
 ## Glowing laser pointer
 
 Replaces Excalidraw's built-in laser with a neon one that is easy to see on light and dark canvases.
