@@ -7,16 +7,50 @@ body,
   width: 100%;
 }
 
+/* FilmFlux brand colors, taken from the logo. */
+:root {
+  --brand-red: #ec4438;
+  --brand-ink: #16161a;
+}
+
+/* The drawing UI's accent color (buttons, selected tools, toggles), switched
+   from its default violet to FilmFlux red. */
+.app .excalidraw {
+  --color-primary: #e0392d;
+  --color-primary-darker: #c4302a;
+  --color-primary-darkest: #a32722;
+  --color-primary-hover: #cc342a;
+  --color-primary-light: #fde4e1;
+  --color-primary-light-darker: #f9cdc8;
+  --color-surface-primary-container: #fde0dc;
+  --color-brand-hover: #cc342a;
+  --color-brand-active: #a32722;
+  --color-slider-track: #f7c9c4;
+}
+
+.app .excalidraw.theme--dark {
+  --color-primary: #ff6b5f;
+  --color-primary-darker: #ff8a80;
+  --color-primary-darkest: #ffa49c;
+  --color-primary-hover: #ff8a80;
+  --color-primary-light: #4a2522;
+  --color-primary-light-darker: #5e2c28;
+  --color-surface-primary-container: #4a2522;
+  --color-brand-hover: #ff8a80;
+  --color-brand-active: #ffb3ab;
+  --color-slider-track: #6e3430;
+}
+
 /* Layout: workspace sidebar on the left, the board fills the rest. */
 .app {
   --ws-bg: #f5f5f8;
   --ws-fg: #26262e;
   --ws-muted: #6f6f7d;
   --ws-hover: #e9e9f0;
-  --ws-active: #dcdcf5;
+  --ws-active: #fbe3e0;
   --ws-border: #e2e2ea;
-  --ws-accent: #6965db;
-  --ws-board-icon: #6965db;
+  --ws-accent: #e0392d;
+  --ws-board-icon: #e0392d;
   --ws-folder-icon: #6f6f7d;
   --ws-menu-bg: #ffffff;
   --ws-danger: #d9363e;
@@ -31,10 +65,10 @@ body,
   --ws-fg: #e6e7ec;
   --ws-muted: #9a9daa;
   --ws-hover: #2a2f38;
-  --ws-active: #353b46;
+  --ws-active: #3d2724;
   --ws-border: #2c313a;
-  --ws-accent: #a8a5ff;
-  --ws-board-icon: #b18cff;
+  --ws-accent: #ff6b5f;
+  --ws-board-icon: #ff6b5f;
   --ws-folder-icon: #c3c5ce;
   --ws-menu-bg: #252a33;
   --ws-danger: #ff6b70;
@@ -85,23 +119,41 @@ body,
   padding-inline: 1rem;
 }
 
-.brand-mark {
-  flex-shrink: 0;
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.brand-wordmark {
+.brand-logo__img {
+  display: block;
+  height: var(--logo-height);
+  width: auto;
+}
+
+/* Show the logo version that suits the theme: charcoal "FILM" on light
+   backgrounds, the original white "FILM" on dark ones. */
+.brand-logo__img--dark,
+.app[data-theme-mode="dark"] .brand-logo__img--light {
+  display: none;
+}
+
+.app[data-theme-mode="dark"] .brand-logo__img--dark {
+  display: block;
+}
+
+.brand-logo__tag {
+  padding: 0.1em 0.45em;
+  border: 1.5px solid currentColor;
+  border-radius: 0.3em;
+  color: var(--brand-red);
   font-family: var(--ws-font);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-
-.brand-wordmark__flux {
-  background: linear-gradient(120deg, #ff4d6d, #7b61ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  font-size: max(0.7rem, calc(var(--logo-height) * 0.32));
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
 }
 
 .ws-header {
@@ -133,7 +185,7 @@ body,
   height: 1.375rem;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #ef8a3c;
+  background: #ec4438;
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 700;
@@ -438,19 +490,6 @@ body,
   }
 }
 
-/* Brand lockup on an empty board's welcome screen. */
-.welcome-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: var(--text-primary-color, #1b1b1f);
-}
-
-.welcome-brand .brand-wordmark {
-  font-family: "Assistant", system-ui, sans-serif;
-  font-size: 2.5rem;
-}
-
 /* --- Library links ---------------------------------------------------------
    Hide links to the drawing library's own website, blog and public library
    catalogue (Help dialog buttons, "Browse libraries", "Publish selected"). */
@@ -532,9 +571,9 @@ body,
 }
 
 .canvas-style__option[aria-checked="true"] {
-  border-color: var(--color-primary, #6965db);
-  background: var(--color-primary-light, #e3e2fe);
-  color: var(--color-primary-darker, #5b57d1);
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary-darker);
 }
 
 /* Sits above Excalidraw's canvases (z-index 1-2) but below its UI layer (4),

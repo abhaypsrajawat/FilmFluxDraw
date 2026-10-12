@@ -17,7 +17,7 @@ import type { StoredScene } from "../workspace/sceneStorage";
 import type { BoardNode, CanvasBackground } from "../workspace/types";
 import { BlankIcon, DotsIcon, GridIcon } from "../workspace/icons";
 import { CanvasGrid } from "./CanvasGrid";
-import { LogoMark, Wordmark } from "../brand/Logo";
+import { BrandLogo } from "../brand/Logo";
 
 const COLOR_KEY = "filmfluxdraw:laser-color";
 const SAVE_DELAY = 400;
@@ -265,10 +265,7 @@ function Editor({
           <WelcomeScreen.Hints.HelpHint />
           <WelcomeScreen.Center>
             <WelcomeScreen.Center.Logo>
-              <span className="welcome-brand">
-                <LogoMark size={44} />
-                <Wordmark />
-              </span>
+              <BrandLogo height={96} />
             </WelcomeScreen.Center.Logo>
             <WelcomeScreen.Center.Heading>
               Sketch shots, map your edit, and present with the glowing laser (press K).
