@@ -179,14 +179,28 @@ function Editor({
     if (api) setContainer(wrapperRef.current?.querySelector<HTMLElement>(".excalidraw") ?? null);
   }, [api]);
 
+  // The glowing laser rides on Excalidraw's own laser tool: while it's on, that
+  // tool is the active one. Picking any other tool (toolbar or shortcut) then
+  // shows up as a tool change in onChange and switches the laser off.
   const setLaser = useCallback(
     (active: boolean) => {
-      // Drop out of any in-progress Excalidraw tool so nothing is half-drawn.
-      if (active) api?.setActiveTool({ type: "selection" });
+      if (!api) return;
+      const current = api.getAppState().activeTool.type;
+      if (active && current !== "laser") api.setActiveTool({ type: "laser" });
+      if (!active && current === "laser") api.setActiveTool({ type: "selection" });
       setLaserActive(active);
     },
     [api],
   );
+
+  const lastToolType = useRef<string | null>(null);
+  const followActiveTool = (toolType: string) => {
+    if (toolType === lastToolType.current) return;
+    const previous = lastToolType.current;
+    lastToolType.current = toolType;
+    if (toolType === "laser") setLaserActive(true);
+    else if (previous === "laser") setLaserActive(false);
+  };
 
   useLaserShortcut(laserActive, setLaser);
 
@@ -205,8 +219,7 @@ function Editor({
         excalidrawAPI={setApi}
         initialData={initialData}
         onChange={(elements, appState, files) => {
-          // Picking Excalidraw's built-in laser switches to the glowing one instead.
-          if (appState.activeTool.type === "laser") setLaser(true);
+          followActiveTool(appState.activeTool.type);
           if (appState.theme !== theme) onThemeChange(appState.theme);
           if (appState.viewBackgroundColor !== paperRef.current) {
             trackPaperColor(appState.viewBackgroundColor);
