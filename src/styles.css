@@ -7,6 +7,475 @@ body,
   width: 100%;
 }
 
+/* Layout: workspace sidebar on the left, the board fills the rest. */
+.app {
+  --ws-bg: #f5f5f8;
+  --ws-fg: #26262e;
+  --ws-muted: #6f6f7d;
+  --ws-hover: #e9e9f0;
+  --ws-active: #dcdcf5;
+  --ws-border: #e2e2ea;
+  --ws-accent: #6965db;
+  --ws-board-icon: #6965db;
+  --ws-folder-icon: #6f6f7d;
+  --ws-menu-bg: #ffffff;
+  --ws-danger: #d9363e;
+  --ws-shadow: 0 8px 24px rgb(20 20 40 / 0.16);
+  --ws-font: "Assistant", system-ui, -apple-system, "Segoe UI", sans-serif;
+  display: flex;
+  background: var(--ws-bg);
+}
+
+.app[data-theme-mode="dark"] {
+  --ws-bg: #1c2027;
+  --ws-fg: #e6e7ec;
+  --ws-muted: #9a9daa;
+  --ws-hover: #2a2f38;
+  --ws-active: #353b46;
+  --ws-border: #2c313a;
+  --ws-accent: #a8a5ff;
+  --ws-board-icon: #b18cff;
+  --ws-folder-icon: #c3c5ce;
+  --ws-menu-bg: #252a33;
+  --ws-danger: #ff6b70;
+  --ws-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
+  color-scheme: dark;
+}
+
+.app__board {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+.board-editor,
+.board-loading {
+  height: 100%;
+}
+
+/* --- Workspace sidebar --------------------------------------------------- */
+
+.ws-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 16.5rem;
+  flex-shrink: 0;
+  height: 100%;
+  padding-block: 0.75rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background: var(--ws-bg);
+  color: var(--ws-fg);
+  border-right: 1px solid var(--ws-border);
+  font-family: var(--ws-font);
+  font-size: 0.9rem;
+}
+
+.ws-sidebar button {
+  font: inherit;
+  color: inherit;
+}
+
+.ws-header {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-inline: 0.625rem;
+}
+
+.ws-header__name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.3rem 0.375rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: none;
+  font-weight: 600;
+  text-align: left;
+  cursor: default;
+}
+
+.ws-avatar {
+  display: grid;
+  place-items: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #ef8a3c;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.ws-header__add {
+  position: relative;
+}
+
+.ws-icon-button {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0.375rem;
+  background: none;
+  color: var(--ws-muted);
+  cursor: pointer;
+}
+
+.ws-icon-button:hover {
+  background: var(--ws-hover);
+  color: var(--ws-fg);
+}
+
+.ws-icon-button--filled {
+  border-radius: 50%;
+  background: var(--ws-hover);
+  color: var(--ws-fg);
+}
+
+.ws-icon-button--filled:hover {
+  background: var(--ws-active);
+}
+
+.ws-sidebar :focus-visible {
+  outline: 2px solid var(--ws-accent);
+  outline-offset: -2px;
+}
+
+.ws-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  padding-inline: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.ws-section--drop {
+  box-shadow: inset 0 0 0 2px var(--ws-accent);
+}
+
+.ws-section__title {
+  margin: 0;
+  padding: 0.5rem 0.5rem 0.25rem;
+  color: var(--ws-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ws-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ws-tree .ws-tree {
+  margin-top: 1px;
+}
+
+.ws-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 2rem;
+  padding-left: calc(var(--depth) * 1rem);
+  border-radius: 0.375rem;
+}
+
+.ws-row:hover {
+  background: var(--ws-hover);
+}
+
+.ws-row--active,
+.ws-row--active:hover {
+  background: var(--ws-active);
+}
+
+.ws-row--drop-inside {
+  box-shadow: inset 0 0 0 2px var(--ws-accent);
+}
+
+.ws-row--drop-before::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: calc(var(--depth) * 1rem + 0.5rem);
+  right: 0.25rem;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--ws-accent);
+}
+
+.ws-row__main {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex: 1;
+  min-width: 0;
+  height: 2rem;
+  padding: 0 0.25rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ws-row--active .ws-row__main {
+  font-weight: 600;
+}
+
+.ws-row__chevron {
+  display: grid;
+  place-items: center;
+  width: 0.875rem;
+  flex-shrink: 0;
+  color: var(--ws-muted);
+  transition: transform 120ms ease;
+}
+
+.ws-row__chevron--open {
+  transform: rotate(90deg);
+}
+
+.ws-row__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.ws-row__icon--board {
+  color: var(--ws-board-icon);
+}
+
+.ws-row__icon--folder {
+  color: var(--ws-folder-icon);
+}
+
+.ws-row__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ws-row__actions {
+  display: none;
+  gap: 0.125rem;
+  padding-right: 0.25rem;
+}
+
+.ws-row:hover .ws-row__actions,
+.ws-row:focus-within .ws-row__actions {
+  display: flex;
+}
+
+.ws-rename {
+  position: absolute;
+  inset: 0.125rem 0.25rem 0.125rem calc(var(--depth, 0) * 1rem + 2.75rem);
+  min-width: 0;
+  padding: 0 0.375rem;
+  border: 1px solid var(--ws-accent);
+  border-radius: 0.3rem;
+  background: var(--ws-menu-bg);
+  color: var(--ws-fg);
+  font: inherit;
+  outline: none;
+}
+
+.ws-header .ws-rename {
+  position: static;
+  flex: 1;
+  height: 1.875rem;
+}
+
+.ws-menu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  right: 0.25rem;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 11rem;
+  padding: 0.25rem;
+  border: 1px solid var(--ws-border);
+  border-radius: 0.5rem;
+  background: var(--ws-menu-bg);
+  box-shadow: var(--ws-shadow);
+}
+
+.ws-header__add .ws-menu {
+  left: auto;
+  right: 0;
+}
+
+.ws-menu button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  border: 0;
+  border-radius: 0.3rem;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ws-menu button:hover,
+.ws-menu button:focus-visible {
+  background: var(--ws-hover);
+}
+
+.ws-menu .ws-menu__danger {
+  color: var(--ws-danger);
+}
+
+.ws-hint {
+  margin: 0.5rem 0.5rem 0;
+  color: var(--ws-muted);
+  font-size: 0.78rem;
+}
+
+.sidebar-reopen {
+  position: absolute;
+  top: 1rem;
+  left: 3.75rem;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--ws-hover);
+  color: var(--ws-fg);
+  cursor: pointer;
+}
+
+.sidebar-reopen:hover {
+  background: var(--ws-active);
+}
+
+.app__scrim {
+  display: none;
+}
+
+/* On phones the sidebar slides over the board instead of pushing it aside. */
+@media (max-width: 720px) {
+  .ws-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 20;
+    width: min(18rem, 85vw);
+    box-shadow: var(--ws-shadow);
+  }
+
+  .app__scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 19;
+    background: rgb(0 0 0 / 0.35);
+  }
+
+  .sidebar-reopen {
+    top: auto;
+    bottom: 5rem;
+    left: 1rem;
+  }
+}
+
+/* --- Canvas background patterns ------------------------------------------ */
+
+/* Behind Excalidraw's canvases (z-index 1-2); follows scroll and zoom through
+   the variables set by CanvasGrid. */
+.excalidraw.excalidraw .canvas-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-size: var(--grid-spacing) var(--grid-spacing);
+  background-position: var(--grid-offset);
+}
+
+.excalidraw.excalidraw .canvas-grid[data-background="dots"] {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgb(40 40 60 / 0.22) 1px,
+    transparent 1.5px
+  );
+}
+
+.excalidraw.excalidraw .canvas-grid[data-background="grid"] {
+  background-image:
+    linear-gradient(to right, rgb(40 40 60 / 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(40 40 60 / 0.08) 1px, transparent 1px);
+}
+
+/* Match the inversion Excalidraw applies to its canvases in dark mode, so the
+   paper and pattern look the same as on a blank board. */
+.excalidraw.excalidraw.theme--dark .canvas-grid {
+  filter: var(--theme-filter);
+}
+
+/* The board's canvas-style picker inside Excalidraw's main menu. */
+.canvas-style {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  width: 100%;
+}
+
+.canvas-style__label {
+  font-size: 0.75rem;
+  color: var(--color-gray-60, #7a7a85);
+}
+
+.canvas-style__options {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.canvas-style__option {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.4rem 0.25rem;
+  border: 1px solid var(--default-border-color, #ddd);
+  border-radius: var(--border-radius-md, 0.375rem);
+  background: none;
+  color: var(--text-primary-color, inherit);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.canvas-style__option:hover {
+  background: var(--button-hover-bg, #f1f0ff);
+}
+
+.canvas-style__option[aria-checked="true"] {
+  border-color: var(--color-primary, #6965db);
+  background: var(--color-primary-light, #e3e2fe);
+  color: var(--color-primary-darker, #5b57d1);
+}
+
 /* Sits above Excalidraw's canvases (z-index 1-2) but below its UI layer (4),
    so toolbars stay clickable while the laser is on. The selector must outrank
    Excalidraw's `.excalidraw canvas` z-index rule and its dark-theme
