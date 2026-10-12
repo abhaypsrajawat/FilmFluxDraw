@@ -41,15 +41,103 @@ jobs:
             exit 1
           fi
 
-      # Uploads only files that changed since the last deploy, and removes
-      # old build files that are no longer part of the site.
+      - name: Install lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      # lftp reconnects and retries on its own when Hostinger drops a
+      # connection, which the previous upload action could not survive.
+      # Order matters: new assets go up first, then index.html (which points
+      # at them), and only then are old assets removed, so visitors never load
+      # a page whose files are missing. Every attempt ends by comparing file
+      # sizes on the server with the build, so a cut-off upload is retried
+      # instead of being reported as a success.
       - name: Upload to Hostinger
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
-          port: ${{ vars.FTP_PORT || 21 }}
-          local-dir: ./dist/
-          server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/' }}
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_PROTOCOL: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          FTP_PORT: ${{ vars.FTP_PORT || '21' }}
+          # Empty means the folder the FTP account opens in. Hostinger FTP accounts
+          # can be limited to one folder (e.g. public_html/draw), and then the
+          # site goes straight there.
+          FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR }}
+        run: |
+          dir="${FTP_SERVER_DIR%/}"
+          dir="${dir:-.}"
+          if [ "$dir" = "." ]; then
+            echo "Uploading into the folder the FTP account opens in."
+          else
+            echo "Uploading into the subfolder '$dir' (set by the FTP_SERVER_DIR variable)."
+          fi
+          # Encrypted by default; set the FTP_PROTOCOL variable to "ftp" to turn it off.
+          if [ "$FTP_PROTOCOL" = "ftp" ]; then tls=false; else tls=true; fi
+
+          # TLS 1.3 can cut uploads short when the data connection closes, so use 1.2.
+          cat > settings.lftp <<SCRIPT
+          set ftp:ssl-allow $tls
+          set ftp:ssl-force $tls
+          set ftp:ssl-protect-data $tls
+          set ssl:verify-certificate no
+          set ssl:priority "NORMAL:-VERS-TLS1.3"
+          set ftp:passive-mode true
+          set net:timeout 30
+          set net:max-retries 8
+          set net:reconnect-interval-base 5
+          set net:reconnect-interval-max 30
+          set cmd:fail-exit true
+          SCRIPT
+
+          cat > upload.lftp <<SCRIPT
+          source settings.lftp
+          mkdir -p -f $dir/assets
+          mirror --reverse --ignore-time --parallel=3 --verbose=1 dist/assets $dir/assets
+          mirror --reverse --ignore-time --verbose=1 --exclude ^assets/ --exclude ^index\.html\$ dist $dir
+          put dist/index.html -o $dir/index.html
+          mirror --reverse --ignore-time --delete --verbose=1 dist/assets $dir/assets
+          bye
+          SCRIPT
+
+          cat > list.lftp <<SCRIPT
+          source settings.lftp
+          cls -1 $dir
+          bye
+          SCRIPT
+
+          cat > verify.lftp <<SCRIPT
+          source settings.lftp
+          mirror --reverse --ignore-time --dry-run dist $dir
+          bye
+          SCRIPT
+
+          connect() {
+            lftp -u "$FTP_USERNAME,$FTP_PASSWORD" -p "$FTP_PORT" -e "source $1" "$FTP_SERVER"
+          }
+
+          # Lists files whose size on the server doesn't match the build. The raw
+          # dry-run output contains the login, so only file names are printed.
+          verify() {
+            connect verify.lftp > verify.out 2>&1 || { echo "Could not check the uploaded files."; rm -f verify.out; return 1; }
+            mismatched=$(grep '^get ' verify.out | sed 's|.*file:[^ ]*/dist/||')
+            rm -f verify.out
+            if [ -n "$mismatched" ]; then
+              echo "Files that did not upload completely:"
+              echo "$mismatched"
+              return 1
+            fi
+          }
+
+          for attempt in 1 2 3; do
+            echo "Upload attempt $attempt"
+            if connect upload.lftp && verify; then
+              echo "Deployed, and every file on the server matches the build."
+              echo "The upload folder now contains:"
+              connect list.lftp || true
+              rm -f settings.lftp upload.lftp verify.lftp list.lftp
+              exit 0
+            fi
+            sleep 20
+          done
+          rm -f settings.lftp upload.lftp verify.lftp list.lftp
+          echo "::error::Upload to Hostinger failed after 3 attempts. See the output above."
+          exit 1

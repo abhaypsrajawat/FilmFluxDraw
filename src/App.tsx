@@ -30,7 +30,7 @@ export default function App() {
   const board = workspace.nodes[workspace.activeBoardId];
 
   useEffect(() => {
-    if (board?.type === "board") document.title = `${board.name} · FilmFluxDraw`;
+    if (board?.type === "board") document.title = `${board.name} · FilmFlux Draw`;
   }, [board]);
 
   const changeTheme = (next: Theme) => {
@@ -62,7 +62,7 @@ export default function App() {
         {!sidebarOpen && (
           <button
             type="button"
-            className="sidebar-reopen"
+            className="sidebar-toggle sidebar-toggle--floating"
             title="Show sidebar"
             aria-label="Show sidebar"
             onClick={() => setSidebarOpen(true)}

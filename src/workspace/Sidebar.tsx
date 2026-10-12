@@ -3,6 +3,7 @@ import type { Workspace, WorkspaceNode } from "./types";
 import { childrenOf, makeBoard, newId, nextOrder, subtreeIds } from "./useWorkspace";
 import type { WorkspaceAction } from "./useWorkspace";
 import { BoardIcon, ChevronIcon, FolderIcon, MoreIcon, PlusIcon, SidebarIcon } from "./icons";
+import { LogoMark, Wordmark } from "../brand/Logo";
 
 type Props = {
   workspace: Workspace;
@@ -219,16 +220,21 @@ export function Sidebar({ workspace, dispatch, onBoardsDeleted, onCollapse, onBo
 
   return (
     <nav className="ws-sidebar" aria-label="Workspace">
-      <div className="ws-header">
+      <div className="ws-brand">
         <button
           type="button"
-          className="ws-icon-button"
+          className="sidebar-toggle"
           title="Hide sidebar"
           aria-label="Hide sidebar"
           onClick={onCollapse}
         >
           <SidebarIcon />
         </button>
+        <LogoMark size={22} />
+        <Wordmark />
+      </div>
+
+      <div className="ws-header">
         {editingWorkspace ? (
           <RenameInput
             value={workspace.name}
