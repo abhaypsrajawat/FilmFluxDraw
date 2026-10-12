@@ -1,5 +1,5 @@
 export const LASER_COLORS = [
-  { name: "Red", value: "#ff2d55" },
+  { name: "FilmFlux red", value: "#ff3b30" },
   { name: "Green", value: "#39ff14" },
   { name: "Cyan", value: "#00e5ff" },
   { name: "Yellow", value: "#ffe600" },

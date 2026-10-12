@@ -230,7 +230,7 @@ export function Sidebar({ workspace, dispatch, onBoardsDeleted, onCollapse, onBo
         >
           <SidebarIcon />
         </button>
-        <LogoMark size={22} />
+        <LogoMark size={26} />
         <Wordmark />
       </div>
 

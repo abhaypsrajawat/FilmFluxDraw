@@ -266,7 +266,7 @@ function Editor({
           <WelcomeScreen.Center>
             <WelcomeScreen.Center.Logo>
               <span className="welcome-brand">
-                <LogoMark size={44} />
+                <LogoMark size={52} />
                 <Wordmark />
               </span>
             </WelcomeScreen.Center.Logo>
