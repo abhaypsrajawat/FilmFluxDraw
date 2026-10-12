@@ -63,7 +63,7 @@ body,
   width: 16.5rem;
   flex-shrink: 0;
   height: 100%;
-  padding-block: 0.75rem;
+  padding-block: 1rem 0.75rem;
   box-sizing: border-box;
   overflow-y: auto;
   background: var(--ws-bg);
@@ -76,6 +76,32 @@ body,
 .ws-sidebar button {
   font: inherit;
   color: inherit;
+}
+
+.ws-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 1rem;
+}
+
+.brand-mark {
+  flex-shrink: 0;
+}
+
+.brand-wordmark {
+  font-family: var(--ws-font);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.brand-wordmark__flux {
+  background: linear-gradient(120deg, #ff4d6d, #7b61ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .ws-header {
@@ -349,15 +375,12 @@ body,
   font-size: 0.78rem;
 }
 
-.sidebar-reopen {
-  position: absolute;
-  top: 1rem;
-  left: 3.75rem;
-  z-index: 5;
+.sidebar-toggle {
   display: grid;
   place-items: center;
   width: 2.25rem;
   height: 2.25rem;
+  flex-shrink: 0;
   padding: 0;
   border: 0;
   border-radius: 0.5rem;
@@ -366,8 +389,21 @@ body,
   cursor: pointer;
 }
 
-.sidebar-reopen:hover {
+.sidebar-toggle:hover {
   background: var(--ws-active);
+}
+
+/* With the sidebar hidden, the toggle sits in the same top-left spot it had
+   inside the sidebar, and the drawing menu moves right to make room. */
+.sidebar-toggle--floating {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 5;
+}
+
+.app[data-sidebar="closed"] .App-menu_top__left {
+  margin-left: 2.75rem;
 }
 
 .app__scrim {
@@ -392,11 +428,36 @@ body,
     background: rgb(0 0 0 / 0.35);
   }
 
-  .sidebar-reopen {
+  .sidebar-toggle--floating {
     top: auto;
     bottom: 5rem;
-    left: 1rem;
   }
+
+  .app[data-sidebar="closed"] .App-menu_top__left {
+    margin-left: 0;
+  }
+}
+
+/* Brand lockup on an empty board's welcome screen. */
+.welcome-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-primary-color, #1b1b1f);
+}
+
+.welcome-brand .brand-wordmark {
+  font-family: "Assistant", system-ui, sans-serif;
+  font-size: 2.5rem;
+}
+
+/* --- Library links ---------------------------------------------------------
+   Hide links to the drawing library's own website, blog and public library
+   catalogue (Help dialog buttons, "Browse libraries", "Publish selected"). */
+.excalidraw .HelpDialog__header,
+.excalidraw .library-menu-browse-button,
+.excalidraw [data-testid="lib-dropdown--remove"] {
+  display: none !important;
 }
 
 /* --- Canvas background patterns ------------------------------------------ */

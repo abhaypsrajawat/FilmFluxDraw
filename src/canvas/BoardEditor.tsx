@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { CaptureUpdateAction, Excalidraw, MainMenu, getSceneVersion } from "@excalidraw/excalidraw";
+import {
+  CaptureUpdateAction,
+  Excalidraw,
+  MainMenu,
+  WelcomeScreen,
+  getSceneVersion,
+} from "@excalidraw/excalidraw";
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { AppState, BinaryFiles, ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import { GlowLaser } from "../laser/GlowLaser";
@@ -11,6 +17,7 @@ import type { StoredScene } from "../workspace/sceneStorage";
 import type { BoardNode, CanvasBackground } from "../workspace/types";
 import { BlankIcon, DotsIcon, GridIcon } from "../workspace/icons";
 import { CanvasGrid } from "./CanvasGrid";
+import { LogoMark, Wordmark } from "../brand/Logo";
 
 const COLOR_KEY = "filmfluxdraw:laser-color";
 const SAVE_DELAY = 400;
@@ -251,6 +258,27 @@ function Editor({
           <MainMenu.DefaultItems.ToggleTheme />
           <MainMenu.DefaultItems.ChangeCanvasBackground />
         </MainMenu>
+        {/* Shown on an empty board until the first shape is drawn. */}
+        <WelcomeScreen>
+          <WelcomeScreen.Hints.MenuHint />
+          <WelcomeScreen.Hints.ToolbarHint />
+          <WelcomeScreen.Hints.HelpHint />
+          <WelcomeScreen.Center>
+            <WelcomeScreen.Center.Logo>
+              <span className="welcome-brand">
+                <LogoMark size={44} />
+                <Wordmark />
+              </span>
+            </WelcomeScreen.Center.Logo>
+            <WelcomeScreen.Center.Heading>
+              Sketch shots, map your edit, and present with the glowing laser (press K).
+            </WelcomeScreen.Center.Heading>
+            <WelcomeScreen.Center.Menu>
+              <WelcomeScreen.Center.MenuItemLoadScene />
+              <WelcomeScreen.Center.MenuItemHelp />
+            </WelcomeScreen.Center.Menu>
+          </WelcomeScreen.Center>
+        </WelcomeScreen>
       </Excalidraw>
       {container &&
         api &&
