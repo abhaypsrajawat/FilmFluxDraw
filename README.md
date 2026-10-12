@@ -62,7 +62,7 @@ Optional **Variables** (same page, **Variables** tab):
 
 ## Branding
 
-- The FilmFlux logo (light and dark versions) lives in `src/brand/`, the app icons in `public/`, and the brand colors at the top of `src/styles.css`, which also turn the drawing tools' accent color FilmFlux red.
+- The FilmFlux "FF" logo and the wordmark live in `src/brand/`, the app icons in `public/`, and the brand colors at the top of `src/styles.css`, which also turn the drawing tools' accent color FilmFlux red.
 - `build/rebrand.ts` renames the drawing engine's own name in its visible text during `npm run build`, and warns if a library upgrade changes one of those texts.
 - Links to the drawing engine's website, blog and public library catalogue are hidden in `src/styles.css`.
 

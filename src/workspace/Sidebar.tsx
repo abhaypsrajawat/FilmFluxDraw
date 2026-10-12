@@ -3,7 +3,7 @@ import type { Workspace, WorkspaceNode } from "./types";
 import { childrenOf, makeBoard, newId, nextOrder, subtreeIds } from "./useWorkspace";
 import type { WorkspaceAction } from "./useWorkspace";
 import { BoardIcon, ChevronIcon, FolderIcon, MoreIcon, PlusIcon, SidebarIcon } from "./icons";
-import { BrandLogo } from "../brand/Logo";
+import { LogoMark, Wordmark } from "../brand/Logo";
 
 type Props = {
   workspace: Workspace;
@@ -230,7 +230,8 @@ export function Sidebar({ workspace, dispatch, onBoardsDeleted, onCollapse, onBo
         >
           <SidebarIcon />
         </button>
-        <BrandLogo height={30} />
+        <LogoMark size={26} />
+        <Wordmark />
       </div>
 
       <div className="ws-header">

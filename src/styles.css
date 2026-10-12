@@ -119,41 +119,26 @@ body,
   padding-inline: 1rem;
 }
 
-.brand-logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+.brand-mark {
+  flex-shrink: 0;
+  border-radius: 22%;
 }
 
-.brand-logo__img {
-  display: block;
-  height: var(--logo-height);
-  width: auto;
+/* The icon's dark tile would melt into dark backgrounds without an edge. */
+.app[data-theme-mode="dark"] .brand-mark {
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.12);
 }
 
-/* Show the logo version that suits the theme: charcoal "FILM" on light
-   backgrounds, the original white "FILM" on dark ones. */
-.brand-logo__img--dark,
-.app[data-theme-mode="dark"] .brand-logo__img--light {
-  display: none;
-}
-
-.app[data-theme-mode="dark"] .brand-logo__img--dark {
-  display: block;
-}
-
-.brand-logo__tag {
-  padding: 0.1em 0.45em;
-  border: 1.5px solid currentColor;
-  border-radius: 0.3em;
-  color: var(--brand-red);
+.brand-wordmark {
   font-family: var(--ws-font);
-  font-size: max(0.7rem, calc(var(--logo-height) * 0.32));
-  font-weight: 800;
-  font-style: italic;
-  letter-spacing: 0.08em;
-  line-height: 1.2;
-  text-transform: uppercase;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.brand-wordmark__flux {
+  color: var(--brand-red);
 }
 
 .ws-header {
@@ -488,6 +473,19 @@ body,
   .app[data-sidebar="closed"] .App-menu_top__left {
     margin-left: 0;
   }
+}
+
+/* Brand lockup on an empty board's welcome screen. */
+.welcome-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-primary-color, #1b1b1f);
+}
+
+.welcome-brand .brand-wordmark {
+  font-family: "Assistant", system-ui, sans-serif;
+  font-size: 2.5rem;
 }
 
 /* --- Library links ---------------------------------------------------------
