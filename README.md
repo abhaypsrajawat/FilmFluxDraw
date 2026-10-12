@@ -56,7 +56,7 @@ Optional **Variables** (same page, **Variables** tab):
 
 | Variable | Default | Change it when |
 | --- | --- | --- |
-| `FTP_SERVER_DIR` | `public_html/draw/` | The site should live somewhere else, e.g. `public_html/` for the main address, or `draw/` if your FTP account already starts inside `public_html` |
+| `FTP_SERVER_DIR` | *(empty: the folder the FTP account opens in)* | Your FTP account opens above the site's folder. For example, a main-account login that opens in your home folder would use `public_html/draw/` |
 | `FTP_PROTOCOL` | `ftps` | The upload fails with a TLS error; set it to `ftp` |
 | `FTP_PORT` | `21` | Your host uses a different port |
 
