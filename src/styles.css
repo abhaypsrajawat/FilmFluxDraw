@@ -1,0 +1,89 @@
+html,
+body,
+#root,
+.app {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* Sits above Excalidraw's canvases (z-index 1-2) but below its UI layer (4),
+   so toolbars stay clickable while the laser is on. The selector must outrank
+   Excalidraw's `.excalidraw canvas` z-index rule and its dark-theme
+   `.excalidraw.theme--dark canvas` invert filter, which would dull the glow. */
+.excalidraw.excalidraw canvas.glow-laser {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+  touch-action: none;
+  filter: none;
+}
+
+.excalidraw.excalidraw canvas.glow-laser[data-active="true"] {
+  pointer-events: auto;
+  cursor: none;
+}
+
+.laser-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.laser-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--default-border-color, #ddd);
+  border-radius: var(--border-radius-lg, 0.5rem);
+  background: var(--island-bg-color, #fff);
+  color: var(--text-primary-color, #1b1b1f);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-island);
+}
+
+.laser-toggle:hover {
+  background: var(--button-hover-bg, #f1f0ff);
+}
+
+.laser-toggle[aria-pressed="true"] {
+  border-color: var(--laser-color);
+  box-shadow: 0 0 0 1px var(--laser-color), 0 0 12px var(--laser-color);
+}
+
+.laser-toggle__dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--laser-color);
+  box-shadow: 0 0 6px 2px var(--laser-color);
+}
+
+.laser-colors {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--border-radius-lg, 0.5rem);
+  background: var(--island-bg-color, #fff);
+  box-shadow: var(--shadow-island);
+}
+
+.laser-swatch {
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.laser-swatch[aria-checked="true"] {
+  border-color: var(--text-primary-color, #1b1b1f);
+}
