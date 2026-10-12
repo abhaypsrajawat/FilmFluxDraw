@@ -24,3 +24,23 @@ Code lives in `src/laser/`:
 - `GlowLaser.tsx` – the canvas overlay that draws the glow
 - `LaserControls.tsx` – toolbar button and color swatches
 - `useLaserShortcut.ts` – takes over the K shortcut and handles Esc
+
+## Auto-deploy to Hostinger
+
+`.github/workflows/deploy.yml` builds the site and uploads `dist/` to Hostinger over FTP on every push to `main`. You can also run it by hand from the **Actions** tab ("Deploy to Hostinger" → **Run workflow**).
+
+Add these under **Settings → Secrets and variables → Actions → Secrets** in GitHub:
+
+| Secret | Value (from hPanel → Files → FTP Accounts) |
+| --- | --- |
+| `FTP_SERVER` | FTP hostname or IP, e.g. `ftp.yourdomain.com` |
+| `FTP_USERNAME` | FTP username, e.g. `u123456789` |
+| `FTP_PASSWORD` | FTP password |
+
+Optional **Variables** (same page, **Variables** tab):
+
+| Variable | Default | Change it when |
+| --- | --- | --- |
+| `FTP_SERVER_DIR` | `public_html/` | The site should live in a subfolder (`public_html/draw/`), or your FTP account already starts inside `public_html` (then use `./`) |
+| `FTP_PROTOCOL` | `ftps` | The upload fails with a TLS error; set it to `ftp` |
+| `FTP_PORT` | `21` | Your host uses a different port |
