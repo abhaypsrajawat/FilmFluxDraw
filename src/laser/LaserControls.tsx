@@ -1,3 +1,5 @@
+import { Swatches } from "../tools/ToolControls";
+
 export const LASER_COLORS = [
   { name: "FilmFlux red", value: "#ff3b30" },
   { name: "Green", value: "#39ff14" },
@@ -17,27 +19,10 @@ type Props = {
 
 export function LaserControls({ active, compact, color, onToggle, onColorChange }: Props) {
   return (
-    <div className="laser-controls" style={{ "--laser-color": color } as React.CSSProperties}>
-      {active && (
-        <div className="laser-colors" role="radiogroup" aria-label="Laser color">
-          {LASER_COLORS.map((c) => (
-            <button
-              key={c.value}
-              type="button"
-              role="radio"
-              aria-checked={c.value === color}
-              aria-label={c.name}
-              title={c.name}
-              className="laser-swatch"
-              style={{ background: c.value }}
-              onClick={() => onColorChange(c.value)}
-            />
-          ))}
-        </div>
-      )}
+    <div className="tool-controls" style={{ "--tool-color": color } as React.CSSProperties}>
       <button
         type="button"
-        className="laser-toggle"
+        className="tool-toggle laser-toggle"
         aria-pressed={active}
         title={active ? "Exit laser pointer (K or Esc)" : "Glowing laser pointer (K)"}
         aria-label="Laser pointer"
@@ -46,6 +31,9 @@ export function LaserControls({ active, compact, color, onToggle, onColorChange 
         <span className="laser-toggle__dot" />
         {!compact && "Laser"}
       </button>
+      {active && (
+        <Swatches label="Laser color" colors={LASER_COLORS} value={color} onChange={onColorChange} />
+      )}
     </div>
   );
 }

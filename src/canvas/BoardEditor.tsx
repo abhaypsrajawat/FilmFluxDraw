@@ -10,8 +10,10 @@ import {
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { AppState, BinaryFiles, ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import { GlowLaser } from "../laser/GlowLaser";
-import { LaserControls, LASER_COLORS } from "../laser/LaserControls";
-import { useLaserShortcut } from "../laser/useLaserShortcut";
+import { LaserControls } from "../laser/LaserControls";
+import { FillControls, ShapePenButton } from "../tools/ToolControls";
+import { useCustomTools } from "../tools/useCustomTools";
+import { useToolShortcuts } from "../tools/useToolShortcuts";
 import { loadScene, saveScene } from "../workspace/sceneStorage";
 import type { StoredScene } from "../workspace/sceneStorage";
 import type { BoardNode, CanvasBackground } from "../workspace/types";
@@ -19,7 +21,6 @@ import { BlankIcon, DotsIcon, GridIcon } from "../workspace/icons";
 import { CanvasGrid } from "./CanvasGrid";
 import { LogoMark, Wordmark } from "../brand/Logo";
 
-const COLOR_KEY = "filmfluxdraw:laser-color";
 const SAVE_DELAY = 400;
 const DEFAULT_PAPER = "#ffffff";
 
@@ -30,16 +31,6 @@ const BACKGROUNDS: { value: CanvasBackground; label: string; Icon: typeof DotsIc
   { value: "grid", label: "Grid", Icon: GridIcon },
   { value: "blank", label: "Blank", Icon: BlankIcon },
 ];
-
-const loadLaserColor = () => {
-  try {
-    const saved = localStorage.getItem(COLOR_KEY);
-    if (saved && LASER_COLORS.some((c) => c.value === saved)) return saved;
-  } catch {
-    // Storage can be unavailable (private mode); fall back to the default.
-  }
-  return LASER_COLORS[0].value;
-};
 
 type Props = {
   board: BoardNode;
@@ -73,8 +64,8 @@ function Editor({
 }: Props & { scene: StoredScene | null }) {
   const [api, setApi] = useState<ExcalidrawImperativeAPI | null>(null);
   const [container, setContainer] = useState<HTMLElement | null>(null);
-  const [laserActive, setLaserActive] = useState(false);
-  const [laserColor, setLaserColor] = useState(loadLaserColor);
+  const tools = useCustomTools(api);
+  useToolShortcuts({ k: tools.laser, b: tools.fill, w: tools.shapePen });
   const [paperColor, setPaperColor] = useState(
     scene?.appState.viewBackgroundColor ?? DEFAULT_PAPER,
   );
@@ -179,49 +170,52 @@ function Editor({
     if (api) setContainer(wrapperRef.current?.querySelector<HTMLElement>(".excalidraw") ?? null);
   }, [api]);
 
-  const setLaser = useCallback(
-    (active: boolean) => {
-      // Drop out of any in-progress Excalidraw tool so nothing is half-drawn.
-      if (active) api?.setActiveTool({ type: "selection" });
-      setLaserActive(active);
-    },
-    [api],
-  );
-
-  useLaserShortcut(laserActive, setLaser);
-
-  const chooseColor = (color: string) => {
-    setLaserColor(color);
-    try {
-      localStorage.setItem(COLOR_KEY, color);
-    } catch {
-      // Not persisting the color is fine.
-    }
-  };
-
   return (
-    <div ref={wrapperRef} className="board-editor">
+    <div
+      ref={wrapperRef}
+      className="board-editor"
+      data-tool={tools.fill.active ? "bucket" : undefined}
+    >
       <Excalidraw
         excalidrawAPI={setApi}
         initialData={initialData}
         onChange={(elements, appState, files) => {
-          // Picking Excalidraw's built-in laser switches to the glowing one instead.
-          if (appState.activeTool.type === "laser") setLaser(true);
+          tools.onSceneChange(elements, appState);
           if (appState.theme !== theme) onThemeChange(appState.theme);
           if (appState.viewBackgroundColor !== paperRef.current) {
             trackPaperColor(appState.viewBackgroundColor);
           }
           scheduleSave(elements, appState, files);
         }}
-        renderTopRightUI={(isMobile) => (
-          <LaserControls
-            active={laserActive}
-            compact={isMobile}
-            color={laserColor}
-            onToggle={() => setLaser(!laserActive)}
-            onColorChange={chooseColor}
-          />
-        )}
+        onPointerDown={(activeTool, pointerDownState) =>
+          tools.onPointerDown(activeTool, pointerDownState.origin)
+        }
+        renderTopRightUI={(isMobile) => {
+          const customTools = (
+            <div className={`custom-tools${isMobile ? " custom-tools--mobile" : ""}`}>
+              <ShapePenButton
+              active={tools.shapePen.active}
+              onToggle={() => tools.shapePen.set(!tools.shapePen.active)}
+            />
+            <FillControls
+              active={tools.fill.active}
+              color={tools.fill.color}
+              onToggle={() => tools.fill.set(!tools.fill.active)}
+              onColorChange={tools.fill.setColor}
+            />
+            <LaserControls
+              active={tools.laser.active}
+              compact={isMobile}
+              color={tools.laser.color}
+              onToggle={() => tools.laser.set(!tools.laser.active)}
+              onColorChange={tools.laser.setColor}
+            />
+          </div>
+          );
+          // Excalidraw's phone toolbar has no room left, so on phones the
+          // tools stand in a column at the canvas's right edge instead.
+          return isMobile && container ? createPortal(customTools, container) : customTools;
+        }}
       >
         <MainMenu>
           <MainMenu.DefaultItems.LoadScene />
@@ -287,7 +281,7 @@ function Editor({
             {board.background !== "blank" && (
               <CanvasGrid api={api} background={board.background} paperColor={paperColor} />
             )}
-            <GlowLaser active={laserActive} color={laserColor} />
+            <GlowLaser active={tools.laser.active} color={tools.laser.color} />
           </>,
           container,
         )}

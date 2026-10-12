@@ -594,17 +594,41 @@ body,
   cursor: none;
 }
 
-.laser-controls {
+.custom-tools {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
 }
 
-.laser-toggle {
+/* Phones: a column on the canvas's right edge, under Excalidraw's own side
+   buttons, with color panels opening to the left. */
+.custom-tools--mobile {
+  position: absolute;
+  top: 12.5rem;
+  right: 0.75rem;
+  z-index: var(--zIndex-layerUI, 4);
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.custom-tools--mobile .tool-swatches {
+  top: 0;
+  right: calc(100% + 0.4rem);
+}
+
+/* One tool button plus, while it's active, its color panel underneath. */
+.tool-controls {
+  position: relative;
+}
+
+.tool-toggle {
+  position: relative;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
   height: 2.25rem;
+  min-width: 2.25rem;
   padding: 0 0.75rem;
   border: 1px solid var(--default-border-color, #ddd);
   border-radius: var(--border-radius-lg, 0.5rem);
@@ -616,41 +640,107 @@ body,
   box-shadow: var(--shadow-island);
 }
 
-.laser-toggle:hover {
+.tool-toggle--icon {
+  padding: 0;
+}
+
+.tool-toggle:hover {
   background: var(--button-hover-bg, #f1f0ff);
 }
 
+.tool-toggle[aria-pressed="true"] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary-darker);
+}
+
+.tool-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* The laser button glows in the laser's own color while it's on. */
 .laser-toggle[aria-pressed="true"] {
-  border-color: var(--laser-color);
-  box-shadow: 0 0 0 1px var(--laser-color), 0 0 12px var(--laser-color);
+  border-color: var(--tool-color);
+  background: var(--island-bg-color, #fff);
+  color: var(--text-primary-color, #1b1b1f);
+  box-shadow: 0 0 0 1px var(--tool-color), 0 0 12px var(--tool-color);
 }
 
 .laser-toggle__dot {
   width: 0.6rem;
   height: 0.6rem;
   border-radius: 50%;
-  background: var(--laser-color);
-  box-shadow: 0 0 6px 2px var(--laser-color);
+  background: var(--tool-color);
+  box-shadow: 0 0 6px 2px var(--tool-color);
 }
 
-.laser-colors {
-  display: flex;
-  gap: 0.35rem;
-  padding: 0.35rem 0.5rem;
+/* Current fill color, shown as a strip on the bucket button. */
+.tool-toggle__chip {
+  position: absolute;
+  left: 0.45rem;
+  right: 0.45rem;
+  bottom: 0.3rem;
+  height: 0.2rem;
+  border-radius: 0.1rem;
+  background: var(--tool-color);
+}
+
+.tool-swatches {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(5, 1.4rem);
+  gap: 0.4rem;
+  padding: 0.5rem;
   border-radius: var(--border-radius-lg, 0.5rem);
   background: var(--island-bg-color, #fff);
   box-shadow: var(--shadow-island);
 }
 
-.laser-swatch {
-  width: 1.25rem;
-  height: 1.25rem;
+.tool-swatch {
+  position: relative;
+  width: 1.4rem;
+  height: 1.4rem;
   padding: 0;
   border: 2px solid transparent;
   border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--default-border-color, rgb(0 0 0 / 0.12));
   cursor: pointer;
 }
 
-.laser-swatch[aria-checked="true"] {
+.tool-swatch[aria-checked="true"] {
   border-color: var(--text-primary-color, #1b1b1f);
+}
+
+/* "No fill": a crossed-out circle. */
+.tool-swatch--none {
+  box-shadow: inset 0 0 0 1.5px var(--color-gray-50, #8a8a96);
+  background:
+    linear-gradient(135deg, transparent 45%, #e03131 45%, #e03131 55%, transparent 55%),
+    var(--island-bg-color, #fff);
+}
+
+/* Free color picker: a rainbow ring until a custom color is chosen. */
+.tool-swatch--custom {
+  display: block;
+  background: conic-gradient(#ff6b6b, #ffd43b, #69db7c, #4dabf7, #b197fc, #ff6b6b);
+  overflow: hidden;
+}
+
+.tool-swatch--custom input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Bucket cursor over the canvas while bucket fill is on. Excalidraw sets the
+   canvas cursor inline, hence !important. */
+.board-editor[data-tool="bucket"] .excalidraw canvas.interactive {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='white' stroke='black' stroke-width='1.5' stroke-linejoin='round'%3E%3Cpath d='m5 11 6.5-6.5a1.5 1.5 0 0 1 2.1 0l5.9 5.9a1.5 1.5 0 0 1 0 2.1L13 19a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8Z'/%3E%3Cpath d='M20.5 15.5s1.5 1.9 1.5 3a1.5 1.5 0 0 1-3 0c0-1.1 1.5-3 1.5-3Z'/%3E%3C/svg%3E") 20 21, crosshair !important;
 }

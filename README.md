@@ -25,6 +25,16 @@ Each board is saved automatically in the browser (IndexedDB), along with its scr
 
 Main menu (☰) → **Canvas**: very light **Dots**, a light **Grid**, or **Blank**. The choice is saved per board, and the pattern follows scroll and zoom.
 
+## Bucket fill and draw to shape
+
+Two extra tools sit next to the laser in the top-right corner (on phones, in a column on the right edge).
+
+**Bucket fill (B)**: pick a color, then click inside a shape to fill it. It works on rectangles, ellipses, diamonds, and closed lines and freehand loops. A freehand loop with a small gap gets the gap closed so the fill shows. Clicking inside a shape that sits within another fills the inner one. "No fill" (the crossed-out swatch) removes a fill; the rainbow swatch picks any color. Clicks on empty canvas do nothing.
+
+**Draw to shape (W)**: sketch freehand and each stroke snaps to the clean shape it resembles: rectangle, ellipse, diamond, triangle or straight line (snapped to horizontal, vertical or 45° when close). Strokes that don't clearly match a shape, like handwriting, stay as drawn. Press undo once to get your freehand stroke back.
+
+Both tools, like the laser, turn off when you pick any other tool or press Esc. The recognizer lives in `src/tools/recognizeShape.ts`; the fill logic in `src/tools/bucketFill.ts`.
+
 ## Glowing laser pointer
 
 Replaces the drawing engine's built-in laser with a neon one that is easy to see on light and dark canvases.
