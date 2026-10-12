@@ -42,7 +42,7 @@ Code lives in `src/laser/`:
 
 ## Auto-deploy to Hostinger
 
-`.github/workflows/deploy.yml` builds the site and uploads `dist/` to Hostinger over FTP on every push to `main`. You can also run it by hand from the **Actions** tab ("Deploy to Hostinger" → **Run workflow**).
+`.github/workflows/deploy.yml` builds the site and uploads `dist/` to Hostinger with `lftp` on every push to `main`. It retries dropped connections, uploads new files before `index.html` and removes old build files last, and checks every file's size on the server before reporting success. You can also run it by hand from the **Actions** tab ("Deploy to Hostinger" → **Run workflow**).
 
 Add these under **Settings → Secrets and variables → Actions → Secrets** in GitHub:
 
@@ -56,7 +56,7 @@ Optional **Variables** (same page, **Variables** tab):
 
 | Variable | Default | Change it when |
 | --- | --- | --- |
-| `FTP_SERVER_DIR` | `public_html/` | The site should live in a subfolder (`public_html/draw/`), or your FTP account already starts inside `public_html` (then use `./`) |
+| `FTP_SERVER_DIR` | `public_html/draw/` | The site should live somewhere else, e.g. `public_html/` for the main address, or `draw/` if your FTP account already starts inside `public_html` |
 | `FTP_PROTOCOL` | `ftps` | The upload fails with a TLS error; set it to `ftp` |
 | `FTP_PORT` | `21` | Your host uses a different port |
 
